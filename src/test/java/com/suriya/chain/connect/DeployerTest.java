@@ -49,8 +49,11 @@ public class DeployerTest {
         Deployer deployer = Deployer.initialize(connectorKeyNodeSet).deploy(filePath, fileName);
         String filePassword = deployer.filePassword();
 
-        System.out.println(firstNode);
-        System.out.println(filePassword);
-        System.out.println(firstNodePassword);
+        System.out.println("filePassword: " + filePassword);
+        System.out.println("firstNode: " + firstNode);
+        System.out.println("firstNodePassword: " + firstNodePassword);
+        connectorKeyNodeSet.stream().forEach(connectorKeyNode -> {
+            System.out.println(connectorKeyNode.getEntryName() + " ::: " + connectorKeyNode.getPassword());
+        });
     }
 }
