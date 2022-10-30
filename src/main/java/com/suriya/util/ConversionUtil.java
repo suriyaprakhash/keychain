@@ -1,5 +1,7 @@
 package com.suriya.util;
 
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+
 import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -29,5 +31,10 @@ public class ConversionUtil {
         BigInteger biStr = new BigInteger(byteString);
         return biStr.toString(10);
     }
+
+    public static ASN1ObjectIdentifier stringToASN1(String inputString) {
+        return ASN1ObjectIdentifier.fromContents(inputString.getBytes(StandardCharsets.UTF_8));
+    }
+
 
 }

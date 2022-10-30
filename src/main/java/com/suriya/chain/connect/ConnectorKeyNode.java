@@ -9,10 +9,12 @@ import java.util.Set;
 
 public final class ConnectorKeyNode extends KeyNode {
 
-    private String nextEntryName;
-    private String nextEntryPasswordHash;
     private Key secureRandomKey;
     private Set<KeyStore.Entry.Attribute> attributeSet;
+
+    public ConnectorKeyNode(KeyNode keyNode) {
+        super(keyNode);
+    }
 
     public ConnectorKeyNode(Map<String, String> attributeMap, String entryName) {
         super(attributeMap, entryName);
@@ -20,22 +22,6 @@ public final class ConnectorKeyNode extends KeyNode {
 
     public void setEntryName(String entryName) {
         this.entryName = entryName;
-    }
-
-    public String getNextEntryName() {
-        return nextEntryName;
-    }
-
-    public void setNextEntryName(String nextEntryName) {
-        this.nextEntryName = nextEntryName;
-    }
-
-    public String getNextEntryPasswordHash() {
-        return nextEntryPasswordHash;
-    }
-
-    public void setNextEntryPasswordHash(String nextEntryPasswordHash) {
-        this.nextEntryPasswordHash = nextEntryPasswordHash;
     }
 
     public Key getSecureRandomKey() {

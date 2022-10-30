@@ -1,69 +1,112 @@
 package com.suriya.chain.connect;
 
+import com.suriya.chain.algorithm.Hash;
 import com.suriya.chain.algorithm.SymmetricKey;
 import com.suriya.chain.parser.AttributeParser;
 import com.suriya.data.KeyNode;
 import com.suriya.io.KeyChainSettings;
 import com.suriya.util.PasswordGenerator;
 
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.security.KeyStore;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+import static com.suriya.io.KeyChainSettings.General.*;
 
 public class NodeBuilder {
 
-    private int ENTRY_ALIAS_NAME_LENGTH = 10;
-
     private List<ConnectorKeyNode> connectorKeyNodeList;
-    private List<String> keyNodeEntryOrderList;
-
-    public List<String> getKeyNodeEntryOrderList() {
-        return keyNodeEntryOrderList;
-    }
+    private String starterNodeName;
 
     private NodeBuilder() {}
 
-    public NodeBuilder initialize(List<KeyNode> keyNodeList) {
+    public static NodeBuilder initialize(List<KeyNode> keyNodeList) {
         NodeBuilder nodeBuilder = new NodeBuilder();
-        nodeBuilder.connectorKeyNodeList =  keyNodeList.stream().map(keyNode -> {
-            return (ConnectorKeyNode) keyNode;
-        }).collect(Collectors.toList());
+        nodeBuilder.connectorKeyNodeList =  keyNodeList.stream().map(keyNode ->  new ConnectorKeyNode(keyNode))
+                .collect(Collectors.toList());
         return nodeBuilder;
     }
 
-    public Set<KeyNode> build() {
-        Set<KeyNode> keyNodeSet = new HashSet<>();
-        keyNodeEntryOrderList = new ArrayList<>();
-
-        connectorKeyNodeList.stream().forEach(keyNode -> {
-
-            String entryAliasName = keyNode.getEntryName();
-            if (entryAliasName == null || (entryAliasName != null && entryAliasName.length() == 0)) {
-                entryAliasName = new PasswordGenerator.Builder()
-                        .lower()
-                        .build().generate(ENTRY_ALIAS_NAME_LENGTH);
-            }
-
-            keyNodeEntryOrderList.add(entryAliasName);
-        });
-        return null;
+    public String first() {
+        return starterNodeName;
     }
 
-    private void generateKey(KeyNode keyNode) {
-        Key key = SymmetricKey.generateSecureRandomKey(KeyChainSettings.Algorithm.secureRandomKeyAlgorithm);
-        byte[] attributeSetByteArray = null;
+    public Set<ConnectorKeyNode> build() {
+
+
+        connectorKeyNodeList.stream().forEach(connectorKeyNode -> {
+            // setting aliasEntryName
+            connectorKeyNode.setEntryName(autoGenerateAliasNameIfMissing(connectorKeyNode.getEntryName()));
+        });
+
+        IntStream.range(0, connectorKeyNodeList.size()).forEach(index -> {
+            ConnectorKeyNode connectorKeyNode = connectorKeyNodeList.get(index);
+
+            // setting key
+            Key key = SymmetricKey
+                    .generateSecureRandomKey(KeyChainSettings.Algorithm.secureRandomKeyAlgorithm);
+            connectorKeyNode.setSecureRandomKey(key);
+
+            // setting attributeSet
+            Set<KeyStore.Entry.Attribute> attributeSet = gatherAttributeSet(connectorKeyNode.getAttributeMap());
+            connectorKeyNode.setAttributeSet(attributeSet);
+
+            KeyStore.Entry.Attribute nextKeyNodeNameAttribute = null;
+            KeyStore.Entry.Attribute nextKeyNodePasswordAttribute = null;
+
+            // setting nextPasswordHash = key + input attributeSet
+            if (index != connectorKeyNodeList.size() - 1) { // skip the last index
+                String nextPasswordHash = generateNextPasswordHash(key.getEncoded(), attributeSet.toString()
+                        .getBytes(StandardCharsets.UTF_8));
+                nextKeyNodeNameAttribute = AttributeParser.getAttributeFromKeyValue(nextKeyNodePasswordAttributeKey,
+                        nextPasswordHash);
+                attributeSet.add(nextKeyNodeNameAttribute);
+            }
+
+            // setting nextNode
+            if (index != connectorKeyNodeList.size() - 1) { // skip the last index
+                String nextNodeName = connectorKeyNodeList.get(index + 1).getEntryName();
+                nextKeyNodePasswordAttribute = AttributeParser.getAttributeFromKeyValue(nextKeyNodeNameAttributeKey,
+                        nextNodeName);
+                attributeSet.add(nextKeyNodePasswordAttribute);
+            }
+        });
+
+        // set starter node
+        starterNodeName = connectorKeyNodeList.get(0).getEntryName();
+
+        Set<ConnectorKeyNode> connectorKeyNodeSet = new HashSet<>(connectorKeyNodeList);
+        return connectorKeyNodeSet;
+    }
+
+    private String generateNextPasswordHash(byte[] encodedKeyByteArray, byte[] attributeMapByteArray) {
+        ByteBuffer buff = ByteBuffer.allocate(encodedKeyByteArray.length + attributeMapByteArray.length);
+        buff.put(encodedKeyByteArray);
+        buff.put(attributeMapByteArray);
+        return new String(Hash.generateMessageDigest(KeyChainSettings.Algorithm.messageDigestAlgorithm, buff.array()));
+    }
+
+    private String autoGenerateAliasNameIfMissing(String entryAliasName) {
+        if (entryAliasName == null || (entryAliasName != null && entryAliasName.length() == 0)) {
+            entryAliasName = new PasswordGenerator.Builder()
+                    .lower()
+                    .build().generate(entryAliasNameLength);
+        }
+        return entryAliasName;
+    }
+
+    private Set<KeyStore.Entry.Attribute> gatherAttributeSet(Map<String,String> attributeMap) {
+        Set<KeyStore.Entry.Attribute> attributeSet = null;
 
         // if attributeMap exists
-        if (keyNode.getAttributeMap() != null && keyNode.getAttributeMap().size() > 0) {
-            Set<KeyStore.Entry.Attribute> attributeSet = AttributeParser
-                    .populateAttributeSetFromMap(keyNode.getAttributeMap());
-            attributeSetByteArray = attributeSet.toString().getBytes(StandardCharsets.UTF_8);
+        if (attributeMap != null && attributeMap.size() > 0) {
+            attributeSet = AttributeParser
+                    .populateAttributeSetFromMap(attributeMap);
         }
-
+        return attributeSet;
     }
 }

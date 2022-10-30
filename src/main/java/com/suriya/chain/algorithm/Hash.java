@@ -18,17 +18,17 @@ public final class Hash {
      * This is not reversible. Used to validate the given password is correct or not against any stored value. Since the
      * given input can only generate one output.
      *
-     * @param message
+     * @param messageByteArray
      * @return
      */
-    public static byte[] generateMessageDigest(String algorithm, String message) {
+    public static byte[] generateMessageDigest(String algorithm, byte[] messageByteArray) {
 
         byte[] digest = null;
         try {
             MessageDigest md = MessageDigest.getInstance(algorithm); //"SHA-256"
 
             //Passing data to the created MessageDigest Object
-            md.update(message.getBytes());
+            md.update(messageByteArray);
 
             //Compute the message digest
             digest = md.digest(); // or md.digest(message.getBytes())
