@@ -3,10 +3,16 @@ package com.suriya.chain.connect;
 import com.suriya.chain.exception.KeyChainException;
 import com.suriya.chain.parser.ByteProcessor;
 import com.suriya.chain.parser.FileProcessor;
-import com.suriya.data.KeyNode;
 import com.suriya.util.PasswordGenerator;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.util.Set;
 
 import static com.suriya.io.KeyChainSettings.General.keyStorePasswordLength;
@@ -15,6 +21,9 @@ import static com.suriya.io.KeyChainSettings.Algorithm.keyStoreAlgorithm;
 public class Deployer {
 
     private Set<ConnectorKeyNode> connectorKeyNodeSet;
+    private String fileName;
+    private String filePath;
+    private String filePassword;
 
     private Deployer() {}
 
@@ -24,28 +33,33 @@ public class Deployer {
         return deployer;
     }
 
-//
-//    public static Deployer initialize(Set<KeyNode> keyNodeSet, String filePath, String fileName) {
-//        Deployer deployer = new Deployer();
-//        deployer.keyNodeSet = keyNodeSet;
-//        deployer.fileName = fileName;
-//        deployer.filePath = filePath;
-//        return deployer;
-//    }
-
-    public void deploy(String filePath, String fileName) throws KeyChainException {
-        deploy(filePath, fileName, null);
+    public String filePassword() {
+        return filePassword;
     }
 
-    public void deploy(String filePath, String fileName, String filePassword) throws KeyChainException {
+    public Deployer deploy(String filePath, String fileName) throws KeyChainException {
+        return deploy(filePath, fileName, null);
+    }
 
+    public Deployer deploy(String filePath, String fileName, String filePassword) throws KeyChainException {
+        this.fileName = fileName;
+        this.filePath = filePath;
+        this.filePassword = filePassword;
+        KeyStore keyStore = addSecretsToKeyStore();
+        FileProcessor.writeFile(keyStore, this.filePath, this.fileName,  this.filePassword);
+        return this;
+    }
+
+    private KeyStore addSecretsToKeyStore() throws KeyChainException {
         byte[] keyStoreByteArray = null;
 
-        try {
-            keyStoreByteArray = FileProcessor.readFromFile(filePath, fileName);
-        } catch (KeyChainException e) {
-            // file error consumed
-            e.printStackTrace();
+        if (filePassword != null) {
+            try {
+                keyStoreByteArray = FileProcessor.readFromFile(filePath, fileName);
+            } catch (KeyChainException e) {
+                // file error consumed
+                e.printStackTrace();
+            }
         }
 
         // handle new file
@@ -62,16 +76,17 @@ public class Deployer {
         // read keystore from existing or init keystore
         KeyStore keyStore = ByteProcessor.keyStoreFromKeyStoreByteArray(keyStoreByteArray, keyStoreAlgorithm,
                 filePassword);
-        String finalFilePassword = filePassword;
         connectorKeyNodeSet.stream().forEach(connectorKeyNode -> {
             try {
                 ByteProcessor.storeSecretKeyInKeyStore(keyStore, keyStoreAlgorithm,
-                        finalFilePassword, connectorKeyNode.getSecureRandomKey(), connectorKeyNode.getEntryName(),
-                        null, connectorKeyNode.getAttributeSet());
+                        filePassword, connectorKeyNode.getSecureRandomKey(), connectorKeyNode.getEntryName(),
+                        connectorKeyNode.getPassword(), connectorKeyNode.getAttributeSet());
             } catch (KeyChainException e) {
                 e.printStackTrace();
             }
         });
+
+        return keyStore;
     }
 
 

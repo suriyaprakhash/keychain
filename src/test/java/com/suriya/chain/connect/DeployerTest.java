@@ -1,19 +1,20 @@
 package com.suriya.chain.connect;
 
+import com.suriya.chain.exception.KeyChainException;
 import com.suriya.data.KeyNode;
-import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.security.KeyStore;
 import java.util.*;
 
-public class NodeBuilderTest {
+public class DeployerTest {
 
-    @Test
-    void nodeBuilderTest() {
-        String filePath = "src//test//resources//store";
-        String fileName = "keyChain";
+    static NodeBuilder nodeBuilder;
+    String filePath = "src//test//resources//store";
+    String fileName = "keyChain";
 
+    @BeforeAll
+    public static void beforeAll() {
         List<KeyNode> keyNodeList = new ArrayList<>();
         Map<String, String> attributeMap1 = new HashMap<>();
         attributeMap1.put("1", "one");
@@ -36,14 +37,20 @@ public class NodeBuilderTest {
         keyNodeList.add(kn2);
         keyNodeList.add(kn3);
 
-        NodeBuilder nodeBuilder = NodeBuilder.initialize(keyNodeList);
+        nodeBuilder = NodeBuilder.initialize(keyNodeList);
+
+    }
+
+    @Test
+    public void deployTest() throws KeyChainException {
         Set<ConnectorKeyNode> connectorKeyNodeSet = nodeBuilder.build();
         String firstNode = nodeBuilder.starterNodeName();
+        String firstNodePassword = nodeBuilder.startedNodePassword();
+        Deployer deployer = Deployer.initialize(connectorKeyNodeSet).deploy(filePath, fileName);
+        String filePassword = deployer.filePassword();
 
-        // checking value
-        Set<KeyStore.Entry.Attribute> attributeSet =connectorKeyNodeSet.stream().filter(keyNode -> keyNode
-                .getEntryName().equals(firstNode)).findAny().get().getAttributeSet();
-        Assertions.assertTrue(attributeSet.stream().anyMatch(attribute -> attribute.getValue().equals("one")));
-        Assertions.assertTrue(attributeSet.stream().anyMatch(attribute -> attribute.getValue().equals("two")));
+        System.out.println(firstNode);
+        System.out.println(filePassword);
+        System.out.println(firstNodePassword);
     }
 }

@@ -21,7 +21,7 @@ public class KeyChain {
 
     public static KeyChain chain(List<KeyNode> keyNodeList) {
       NodeBuilder nodeBuilder = NodeBuilder.initialize(keyNodeList);
-      KeyChain keyChain = new KeyChain(nodeBuilder.first(), nodeBuilder.build());
+      KeyChain keyChain = new KeyChain(nodeBuilder.starterNodeName(), nodeBuilder.build());
       return keyChain;
     }
 

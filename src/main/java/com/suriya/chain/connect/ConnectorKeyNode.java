@@ -11,6 +11,7 @@ public final class ConnectorKeyNode extends KeyNode {
 
     private Key secureRandomKey;
     private Set<KeyStore.Entry.Attribute> attributeSet;
+    private String password;
 
     public ConnectorKeyNode(KeyNode keyNode) {
         super(keyNode);
@@ -38,5 +39,13 @@ public final class ConnectorKeyNode extends KeyNode {
 
     public void setAttributeSet(Set<KeyStore.Entry.Attribute> attributeSet) {
         this.attributeSet = attributeSet;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }

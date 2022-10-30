@@ -21,6 +21,7 @@ public class NodeBuilder {
 
     private List<ConnectorKeyNode> connectorKeyNodeList;
     private String starterNodeName;
+    private String starterNodePassword;
 
     private NodeBuilder() {}
 
@@ -31,8 +32,12 @@ public class NodeBuilder {
         return nodeBuilder;
     }
 
-    public String first() {
+    public String starterNodeName() {
         return starterNodeName;
+    }
+
+    public String startedNodePassword() {
+        return starterNodePassword;
     }
 
     public Set<ConnectorKeyNode> build() {
@@ -58,26 +63,43 @@ public class NodeBuilder {
             KeyStore.Entry.Attribute nextKeyNodeNameAttribute = null;
             KeyStore.Entry.Attribute nextKeyNodePasswordAttribute = null;
 
-            // setting nextPasswordHash = key + input attributeSet
+            String nextPasswordHash = null;
+
+            // setting attribute - nextPasswordHash = key + input attributeSet
             if (index != connectorKeyNodeList.size() - 1) { // skip the last index
-                String nextPasswordHash = generateNextPasswordHash(key.getEncoded(), attributeSet.toString()
+                nextPasswordHash = generateNextPasswordHash(key.getEncoded(), attributeSet.toString()
                         .getBytes(StandardCharsets.UTF_8));
                 nextKeyNodeNameAttribute = AttributeParser.getAttributeFromKeyValue(nextKeyNodePasswordAttributeKey,
                         nextPasswordHash);
                 attributeSet.add(nextKeyNodeNameAttribute);
             }
 
-            // setting nextNode
+            // setting attribute - nextNode
             if (index != connectorKeyNodeList.size() - 1) { // skip the last index
                 String nextNodeName = connectorKeyNodeList.get(index + 1).getEntryName();
                 nextKeyNodePasswordAttribute = AttributeParser.getAttributeFromKeyValue(nextKeyNodeNameAttributeKey,
                         nextNodeName);
                 attributeSet.add(nextKeyNodePasswordAttribute);
             }
+
+            // setting generated hash password in the next node
+            if (index != connectorKeyNodeList.size() - 1) {
+                connectorKeyNodeList.get(index + 1).setPassword(nextPasswordHash);
+            }
+
         });
 
         // set starter node
         starterNodeName = connectorKeyNodeList.get(0).getEntryName();
+
+        // set starter node password
+        this.starterNodePassword = new PasswordGenerator.Builder()
+                .lower(2)
+                .upper(2)
+                .digits(1)
+                .build().generate(keyStorePasswordLength);
+        connectorKeyNodeList.get(0).setPassword(this.starterNodePassword);
+
 
         Set<ConnectorKeyNode> connectorKeyNodeSet = new HashSet<>(connectorKeyNodeList);
         return connectorKeyNodeSet;
@@ -87,7 +109,8 @@ public class NodeBuilder {
         ByteBuffer buff = ByteBuffer.allocate(encodedKeyByteArray.length + attributeMapByteArray.length);
         buff.put(encodedKeyByteArray);
         buff.put(attributeMapByteArray);
-        return new String(Hash.generateMessageDigest(KeyChainSettings.Algorithm.messageDigestAlgorithm, buff.array()));
+        return Hash.getHexStringFromByteArray(Hash.generateMessageDigest(KeyChainSettings.Algorithm
+                .messageDigestAlgorithm, buff.array()));
     }
 
     private String autoGenerateAliasNameIfMissing(String entryAliasName) {
