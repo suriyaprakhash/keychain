@@ -38,7 +38,6 @@ public class DeployerTest {
         keyNodeList.add(kn3);
 
         nodeBuilder = NodeBuilder.initialize(keyNodeList);
-
     }
 
     @Test

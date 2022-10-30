@@ -41,8 +41,6 @@ public class NodeBuilder {
     }
 
     public Set<ConnectorKeyNode> build() {
-
-
         connectorKeyNodeList.stream().forEach(connectorKeyNode -> {
             // setting aliasEntryName
             connectorKeyNode.setEntryName(autoGenerateAliasNameIfMissing(connectorKeyNode.getEntryName()));
