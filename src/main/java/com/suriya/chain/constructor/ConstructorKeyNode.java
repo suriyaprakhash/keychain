@@ -1,4 +1,4 @@
-package com.suriya.chain.connect;
+package com.suriya.chain.constructor;
 
 import com.suriya.data.KeyNode;
 
@@ -7,17 +7,17 @@ import java.security.KeyStore;
 import java.util.Map;
 import java.util.Set;
 
-public final class ConnectorKeyNode extends KeyNode {
+public final class ConstructorKeyNode extends KeyNode {
 
     private Key secureRandomKey;
     private Set<KeyStore.Entry.Attribute> attributeSet;
     private String password;
 
-    public ConnectorKeyNode(KeyNode keyNode) {
+    public ConstructorKeyNode(KeyNode keyNode) {
         super(keyNode);
     }
 
-    public ConnectorKeyNode(Map<String, String> attributeMap, String entryName) {
+    public ConstructorKeyNode(Map<String, String> attributeMap, String entryName) {
         super(attributeMap, entryName);
     }
 

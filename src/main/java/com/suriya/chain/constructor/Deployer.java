@@ -1,18 +1,11 @@
-package com.suriya.chain.connect;
+package com.suriya.chain.constructor;
 
 import com.suriya.chain.exception.KeyChainException;
 import com.suriya.chain.parser.ByteProcessor;
 import com.suriya.chain.parser.FileProcessor;
 import com.suriya.util.PasswordGenerator;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
 import java.util.Set;
 
 import static com.suriya.io.KeyChainSettings.General.keyStorePasswordLength;
@@ -20,16 +13,16 @@ import static com.suriya.io.KeyChainSettings.Algorithm.keyStoreAlgorithm;
 
 public class Deployer {
 
-    private Set<ConnectorKeyNode> connectorKeyNodeSet;
+    private Set<ConstructorKeyNode> constructorKeyNodeSet;
     private String fileName;
     private String filePath;
     private String filePassword;
 
     private Deployer() {}
 
-    public static Deployer initialize(Set<ConnectorKeyNode> connectorKeyNodeSet) {
+    public static Deployer initialize(Set<ConstructorKeyNode> constructorKeyNodeSet) {
         Deployer deployer = new Deployer();
-        deployer.connectorKeyNodeSet = connectorKeyNodeSet;
+        deployer.constructorKeyNodeSet = constructorKeyNodeSet;
         return deployer;
     }
 
@@ -76,7 +69,7 @@ public class Deployer {
         // read keystore from existing or init keystore
         KeyStore keyStore = ByteProcessor.keyStoreFromKeyStoreByteArray(keyStoreByteArray, keyStoreAlgorithm,
                 filePassword);
-        connectorKeyNodeSet.stream().forEach(connectorKeyNode -> {
+        constructorKeyNodeSet.stream().forEach(connectorKeyNode -> {
             try {
                 ByteProcessor.storeSecretKeyInKeyStore(keyStore, keyStoreAlgorithm,
                         filePassword, connectorKeyNode.getSecureRandomKey(), connectorKeyNode.getEntryName(),

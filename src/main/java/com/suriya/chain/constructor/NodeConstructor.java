@@ -1,4 +1,4 @@
-package com.suriya.chain.connect;
+package com.suriya.chain.constructor;
 
 import com.suriya.chain.algorithm.Hash;
 import com.suriya.chain.algorithm.SymmetricKey;
@@ -17,19 +17,19 @@ import java.util.stream.IntStream;
 
 import static com.suriya.io.KeyChainSettings.General.*;
 
-public class NodeBuilder {
+public class NodeConstructor {
 
-    private List<ConnectorKeyNode> connectorKeyNodeList;
+    private List<ConstructorKeyNode> constructorKeyNodeList;
     private String starterNodeName;
     private String starterNodePassword;
 
-    private NodeBuilder() {}
+    private NodeConstructor() {}
 
-    public static NodeBuilder initialize(List<KeyNode> keyNodeList) {
-        NodeBuilder nodeBuilder = new NodeBuilder();
-        nodeBuilder.connectorKeyNodeList =  keyNodeList.stream().map(keyNode ->  new ConnectorKeyNode(keyNode))
+    public static NodeConstructor initialize(List<KeyNode> keyNodeList) {
+        NodeConstructor nodeConstructor = new NodeConstructor();
+        nodeConstructor.constructorKeyNodeList =  keyNodeList.stream().map(keyNode ->  new ConstructorKeyNode(keyNode))
                 .collect(Collectors.toList());
-        return nodeBuilder;
+        return nodeConstructor;
     }
 
     public String starterNodeName() {
@@ -40,23 +40,23 @@ public class NodeBuilder {
         return starterNodePassword;
     }
 
-    public Set<ConnectorKeyNode> build() {
-        connectorKeyNodeList.stream().forEach(connectorKeyNode -> {
+    public Set<ConstructorKeyNode> build() {
+        constructorKeyNodeList.stream().forEach(connectorKeyNode -> {
             // setting aliasEntryName
             connectorKeyNode.setEntryName(autoGenerateAliasNameIfMissing(connectorKeyNode.getEntryName()));
         });
 
-        IntStream.range(0, connectorKeyNodeList.size()).forEach(index -> {
-            ConnectorKeyNode connectorKeyNode = connectorKeyNodeList.get(index);
+        IntStream.range(0, constructorKeyNodeList.size()).forEach(index -> {
+            ConstructorKeyNode constructorKeyNode = constructorKeyNodeList.get(index);
 
             // setting key
             Key key = SymmetricKey
                     .generateSecureRandomKey(KeyChainSettings.Algorithm.secureRandomKeyAlgorithm);
-            connectorKeyNode.setSecureRandomKey(key);
+            constructorKeyNode.setSecureRandomKey(key);
 
             // setting attributeSet
-            Set<KeyStore.Entry.Attribute> attributeSet = gatherAttributeSet(connectorKeyNode.getAttributeMap());
-            connectorKeyNode.setAttributeSet(attributeSet);
+            Set<KeyStore.Entry.Attribute> attributeSet = gatherAttributeSet(constructorKeyNode.getAttributeMap());
+            constructorKeyNode.setAttributeSet(attributeSet);
 
             KeyStore.Entry.Attribute nextKeyNodeNameAttribute = null;
             KeyStore.Entry.Attribute nextKeyNodePasswordAttribute = null;
@@ -64,7 +64,7 @@ public class NodeBuilder {
             String nextPasswordHash = null;
 
             // setting attribute - nextPasswordHash = key + input attributeSet
-            if (index != connectorKeyNodeList.size() - 1) { // skip the last index
+            if (index != constructorKeyNodeList.size() - 1) { // skip the last index
                 nextPasswordHash = generateNextPasswordHash(key.getEncoded(), attributeSet.toString()
                         .getBytes(StandardCharsets.UTF_8));
                 nextKeyNodeNameAttribute = AttributeParser.getAttributeFromKeyValue(nextKeyNodePasswordAttributeKey,
@@ -73,22 +73,22 @@ public class NodeBuilder {
             }
 
             // setting attribute - nextNode
-            if (index != connectorKeyNodeList.size() - 1) { // skip the last index
-                String nextNodeName = connectorKeyNodeList.get(index + 1).getEntryName();
+            if (index != constructorKeyNodeList.size() - 1) { // skip the last index
+                String nextNodeName = constructorKeyNodeList.get(index + 1).getEntryName();
                 nextKeyNodePasswordAttribute = AttributeParser.getAttributeFromKeyValue(nextKeyNodeNameAttributeKey,
                         nextNodeName);
                 attributeSet.add(nextKeyNodePasswordAttribute);
             }
 
             // setting generated hash password in the next node
-            if (index != connectorKeyNodeList.size() - 1) {
-                connectorKeyNodeList.get(index + 1).setPassword(nextPasswordHash);
+            if (index != constructorKeyNodeList.size() - 1) {
+                constructorKeyNodeList.get(index + 1).setPassword(nextPasswordHash);
             }
 
         });
 
         // set starter node
-        starterNodeName = connectorKeyNodeList.get(0).getEntryName();
+        starterNodeName = constructorKeyNodeList.get(0).getEntryName();
 
         // set starter node password
         this.starterNodePassword = new PasswordGenerator.Builder()
@@ -96,11 +96,11 @@ public class NodeBuilder {
                 .upper(2)
                 .digits(1)
                 .build().generate(keyStorePasswordLength);
-        connectorKeyNodeList.get(0).setPassword(this.starterNodePassword);
+        constructorKeyNodeList.get(0).setPassword(this.starterNodePassword);
 
 
-        Set<ConnectorKeyNode> connectorKeyNodeSet = new HashSet<>(connectorKeyNodeList);
-        return connectorKeyNodeSet;
+        Set<ConstructorKeyNode> constructorKeyNodeSet = new HashSet<>(constructorKeyNodeList);
+        return constructorKeyNodeSet;
     }
 
     private String generateNextPasswordHash(byte[] encodedKeyByteArray, byte[] attributeMapByteArray) {

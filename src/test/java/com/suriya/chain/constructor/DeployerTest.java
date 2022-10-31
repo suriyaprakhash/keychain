@@ -1,4 +1,4 @@
-package com.suriya.chain.connect;
+package com.suriya.chain.constructor;
 
 import com.suriya.chain.exception.KeyChainException;
 import com.suriya.data.KeyNode;
@@ -9,7 +9,7 @@ import java.util.*;
 
 public class DeployerTest {
 
-    static NodeBuilder nodeBuilder;
+    static NodeConstructor nodeConstructor;
     String filePath = "src//test//resources//store";
     String fileName = "keyChain";
 
@@ -37,21 +37,21 @@ public class DeployerTest {
         keyNodeList.add(kn2);
         keyNodeList.add(kn3);
 
-        nodeBuilder = NodeBuilder.initialize(keyNodeList);
+        nodeConstructor = NodeConstructor.initialize(keyNodeList);
     }
 
     @Test
     public void deployTest() throws KeyChainException {
-        Set<ConnectorKeyNode> connectorKeyNodeSet = nodeBuilder.build();
-        String firstNode = nodeBuilder.starterNodeName();
-        String firstNodePassword = nodeBuilder.startedNodePassword();
-        Deployer deployer = Deployer.initialize(connectorKeyNodeSet).deploy(filePath, fileName);
+        Set<ConstructorKeyNode> constructorKeyNodeSet = nodeConstructor.build();
+        String firstNode = nodeConstructor.starterNodeName();
+        String firstNodePassword = nodeConstructor.startedNodePassword();
+        Deployer deployer = Deployer.initialize(constructorKeyNodeSet).deploy(filePath, fileName);
         String filePassword = deployer.filePassword();
 
         System.out.println("filePassword: " + filePassword);
         System.out.println("firstNode: " + firstNode);
         System.out.println("firstNodePassword: " + firstNodePassword);
-        connectorKeyNodeSet.stream().forEach(connectorKeyNode -> {
+        constructorKeyNodeSet.stream().forEach(connectorKeyNode -> {
             System.out.println(connectorKeyNode.getEntryName() + " ::: " + connectorKeyNode.getPassword());
         });
     }

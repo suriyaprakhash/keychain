@@ -1,4 +1,4 @@
-package com.suriya.chain.connect;
+package com.suriya.chain.constructor;
 
 import com.suriya.data.KeyNode;
 import org.junit.jupiter.api.Assertions;
@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import java.security.KeyStore;
 import java.util.*;
 
-public class NodeBuilderTest {
+public class NodeConstructorTest {
 
     @Test
     void nodeBuilderTest() {
@@ -36,12 +36,12 @@ public class NodeBuilderTest {
         keyNodeList.add(kn2);
         keyNodeList.add(kn3);
 
-        NodeBuilder nodeBuilder = NodeBuilder.initialize(keyNodeList);
-        Set<ConnectorKeyNode> connectorKeyNodeSet = nodeBuilder.build();
-        String firstNode = nodeBuilder.starterNodeName();
+        NodeConstructor nodeConstructor = NodeConstructor.initialize(keyNodeList);
+        Set<ConstructorKeyNode> constructorKeyNodeSet = nodeConstructor.build();
+        String firstNode = nodeConstructor.starterNodeName();
 
         // checking value
-        Set<KeyStore.Entry.Attribute> attributeSet =connectorKeyNodeSet.stream().filter(keyNode -> keyNode
+        Set<KeyStore.Entry.Attribute> attributeSet = constructorKeyNodeSet.stream().filter(keyNode -> keyNode
                 .getEntryName().equals(firstNode)).findAny().get().getAttributeSet();
         Assertions.assertTrue(attributeSet.stream().anyMatch(attribute -> attribute.getValue().equals("one")));
         Assertions.assertTrue(attributeSet.stream().anyMatch(attribute -> attribute.getValue().equals("two")));

@@ -155,7 +155,8 @@ public class ByteProcessor {
         return keyStoreByteArray;
     }
 
-    public static KeyStore readKeyStoreFromByteArray(byte[] keyStoreByteArray, String keyStoreAlgorithm, String keyStorePass) {
+    public static KeyStore readKeyStoreFromByteArray(byte[] keyStoreByteArray, String keyStoreAlgorithm,
+                                                     String keyStorePass) {
         KeyStore keyStore = null;
         try {
             keyStore = KeyStore.getInstance(keyStoreAlgorithm);
@@ -175,7 +176,8 @@ public class ByteProcessor {
         return keyStore;
     }
 
-    public static SecretKey readSecretKeyFromKeyStore(KeyStore keyStore, String secretKeyEntryAliasName, String secretKeyPassword) {
+    public static SecretKey readSecretKeyFromKeyStore(KeyStore keyStore, String secretKeyEntryAliasName,
+                                                      String secretKeyPassword) {
         SecretKey secretKey = null;
         try {
             secretKey = (SecretKey) keyStore.getKey(secretKeyEntryAliasName, secretKeyPassword.toCharArray());
@@ -189,7 +191,8 @@ public class ByteProcessor {
         return secretKey;
     }
 
-    public static KeyStore.Entry readKeyStoreEntryOfSecretKeyFromKeyStore(KeyStore keyStore, String secretKeyEntryAliasName, String secretKeyPassword) {
+    public static KeyStore.Entry readKeyStoreEntryOfSecretKeyFromKeyStore(KeyStore keyStore,
+                                       String secretKeyEntryAliasName, String secretKeyPassword) {
         KeyStore.Entry keyStoreEntry = null;
         try {
 
