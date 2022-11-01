@@ -21,21 +21,18 @@ public class KeyChain {
         private String startsWithPassword;
         private String filePassword;
         private Set<ConstructorKeyNode> constructorKeyNodeSet;
-        private PrivateKey privateKey;
 
-        private Constructor(String startsWith, String startsWithPassword, Set<ConstructorKeyNode> constructorKeyNodeSet,
-                            PrivateKey privateKey) {
+        private Constructor(String startsWith, String startsWithPassword, Set<ConstructorKeyNode> constructorKeyNodeSet) {
             this.startsWith = startsWith;
             this.startsWithPassword = startsWithPassword;
             this.constructorKeyNodeSet = constructorKeyNodeSet;
-            this.privateKey = privateKey;
         }
 
         public static Constructor construct(List<KeyNode> keyNodeList) {
             NodeConstructor nodeConstructor = NodeConstructor.initialize(keyNodeList, null);
             Set<ConstructorKeyNode> constructorKeyNodeSet = nodeConstructor.build();
             Constructor keyChain = new Constructor(nodeConstructor.starterNodeName(), nodeConstructor.startedNodePassword(),
-                    constructorKeyNodeSet, null);
+                    constructorKeyNodeSet);
             return keyChain;
         }
 
@@ -43,7 +40,7 @@ public class KeyChain {
             NodeConstructor nodeConstructor = NodeConstructor.initialize(keyNodeList, privateKey);
             Set<ConstructorKeyNode> constructorKeyNodeSet = nodeConstructor.build();
             Constructor keyChain = new Constructor(nodeConstructor.starterNodeName(), nodeConstructor.startedNodePassword(),
-                    constructorKeyNodeSet, privateKey);
+                    constructorKeyNodeSet);
             return keyChain;
         }
 

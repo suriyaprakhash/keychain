@@ -26,9 +26,11 @@ public class NodeConstructor {
     private List<ConstructorKeyNode> constructorKeyNodeList;
     private String starterNodeName;
     private String starterNodePassword;
-    private PrivateKey privateKey;
+    private final PrivateKey privateKey;
 
-    private NodeConstructor(PrivateKey privateKey) {}
+    private NodeConstructor(PrivateKey privateKey) {
+        this.privateKey = privateKey;
+    }
 
     public static NodeConstructor initialize(List<KeyNode> keyNodeList) {
         NodeConstructor nodeConstructor = new NodeConstructor(null);
