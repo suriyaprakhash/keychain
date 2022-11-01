@@ -11,6 +11,7 @@ import com.suriya.chain.resolve.ResolverKeyNode;
 import com.suriya.data.KeyNode;
 
 import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.util.List;
 import java.util.Set;
 
@@ -87,6 +88,11 @@ public class KeyChain {
 
         public ResolverKeyNode resolve(String entryName, String entryPassword, Set<String> attributeMapKeySet) {
             return this.nodeResolver.resolve(entryName, entryPassword, attributeMapKeySet);
+        }
+
+        public ResolverKeyNode resolve(String entryName, String entryPassword, Set<String> attributeMapKeySet,
+                                       PublicKey publicKey) {
+            return this.nodeResolver.resolve(entryName, entryPassword, attributeMapKeySet, publicKey);
         }
     }
 

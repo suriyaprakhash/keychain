@@ -1,12 +1,16 @@
 package com.suriya.io;
 
+import com.suriya.chain.algorithm.AsymmetricKey;
 import com.suriya.chain.exception.KeyChainException;
 import com.suriya.chain.resolve.ResolverKeyNode;
 import com.suriya.data.KeyNode;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.security.KeyPair;
 import java.util.*;
+
+import static com.suriya.io.KeyChainSettings.Algorithm.*;
 
 public class KeyChainTest {
 
@@ -112,6 +116,51 @@ public class KeyChainTest {
         Assertions.assertEquals(attributeMap3.get("1"), resolverKeyNode3.getAttributeMap().get("1"));
         Assertions.assertEquals(attributeMap3.get("2"), resolverKeyNode3.getAttributeMap().get("2"));
         Assertions.assertEquals(attributeMap3.get("3"), resolverKeyNode3.getAttributeMap().get("3"));
+    }
+
+
+    @Test
+    public void resolveKeyStoreTest_Encrypted() throws KeyChainException {
+        KeyPair keyPair = AsymmetricKey.generateAsymmetricKey(keyPairAlgorithm, keyPairKeySize);
+
+        List<KeyNode> keyNodeList1 = new ArrayList<>();
+        Map<String, String> attributeMap1 = new HashMap<>();
+        attributeMap1.put("1", "one");
+        attributeMap1.put("2", "two");
+        KeyNode kn1 = new KeyNode(attributeMap1);
+
+        Map<String, String> attributeMap2 = new HashMap<>();
+        attributeMap2.put("1", "onnnu");
+        attributeMap2.put("2", "rendu");
+        KeyNode kn2 = new KeyNode(attributeMap2);
+
+
+        Map<String, String> attributeMap3 = new HashMap<>();
+        attributeMap3.put("1", "elc1");
+        attributeMap3.put("2", "elc2");
+        attributeMap3.put("3", "elc3");
+        KeyNode kn3 = new KeyNode(attributeMap3);
+
+        keyNodeList1.add(kn1);
+        keyNodeList1.add(kn2);
+        keyNodeList1.add(kn3);
+
+        KeyChain.Constructor keyChainConstructor = KeyChain.Constructor.construct(keyNodeList1, keyPair.getPrivate())
+                .deploy( filePath,fileName, null);
+        System.out.println("startsWith " + keyChainConstructor.startsWith());
+        System.out.println("startsWithPassword " + keyChainConstructor.startsWithPassword());
+        System.out.println("filePassword " + keyChainConstructor.filePassword());
+
+        // node1
+        Set<String> node1AttributeKeySet = new HashSet<>();
+        node1AttributeKeySet.add("1");
+        node1AttributeKeySet.add("2");
+        ResolverKeyNode resolverKeyNode1 = KeyChain.Resolver
+                .initialize(filePath, fileName, keyChainConstructor.filePassword())
+                .resolve(keyChainConstructor.startsWith(), keyChainConstructor.startsWithPassword(),
+                        node1AttributeKeySet, keyPair.getPublic());
+        Assertions.assertEquals(attributeMap1.get("1"), resolverKeyNode1.getAttributeMap().get("1"));
+        Assertions.assertEquals(attributeMap1.get("2"), resolverKeyNode1.getAttributeMap().get("2"));
     }
 
 
