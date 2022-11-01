@@ -13,6 +13,9 @@ public class KeyChainSettings {
         public static String secureRandomKeyAlgorithm = "HmacSHA256";
         public static String messageDigestAlgorithm ="SHA-256";
         public static String keyStoreAlgorithm = "PKCS12";
+        public static String keyPairAlgorithm = "RSA";
+        public static int keyPairKeySize = 2048;
+        public static String cipherAlgorithm = "RSA/ECB/PKCS1Padding";
     }
 
 }

@@ -1,5 +1,6 @@
 package com.suriya.io;
 
+import com.suriya.chain.algorithm.AsymmetricKey;
 import com.suriya.chain.constructor.ConstructorKeyNode;
 import com.suriya.chain.constructor.Deployer;
 import com.suriya.chain.constructor.NodeConstructor;
@@ -9,10 +10,8 @@ import com.suriya.chain.resolve.Reader;
 import com.suriya.chain.resolve.ResolverKeyNode;
 import com.suriya.data.KeyNode;
 
-import java.security.Key;
-import java.security.KeyStore;
+import java.security.PrivateKey;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public class KeyChain {
@@ -22,18 +21,29 @@ public class KeyChain {
         private String startsWithPassword;
         private String filePassword;
         private Set<ConstructorKeyNode> constructorKeyNodeSet;
+        private PrivateKey privateKey;
 
-        private Constructor(String startsWith, String startsWithPassword, Set<ConstructorKeyNode> constructorKeyNodeSet) {
+        private Constructor(String startsWith, String startsWithPassword, Set<ConstructorKeyNode> constructorKeyNodeSet,
+                            PrivateKey privateKey) {
             this.startsWith = startsWith;
             this.startsWithPassword = startsWithPassword;
             this.constructorKeyNodeSet = constructorKeyNodeSet;
+            this.privateKey = privateKey;
         }
 
         public static Constructor construct(List<KeyNode> keyNodeList) {
-            NodeConstructor nodeConstructor = NodeConstructor.initialize(keyNodeList);
+            NodeConstructor nodeConstructor = NodeConstructor.initialize(keyNodeList, null);
             Set<ConstructorKeyNode> constructorKeyNodeSet = nodeConstructor.build();
             Constructor keyChain = new Constructor(nodeConstructor.starterNodeName(), nodeConstructor.startedNodePassword(),
-                    constructorKeyNodeSet);
+                    constructorKeyNodeSet, null);
+            return keyChain;
+        }
+
+        public static Constructor construct(List<KeyNode> keyNodeList, PrivateKey privateKey) {
+            NodeConstructor nodeConstructor = NodeConstructor.initialize(keyNodeList, privateKey);
+            Set<ConstructorKeyNode> constructorKeyNodeSet = nodeConstructor.build();
+            Constructor keyChain = new Constructor(nodeConstructor.starterNodeName(), nodeConstructor.startedNodePassword(),
+                    constructorKeyNodeSet, privateKey);
             return keyChain;
         }
 

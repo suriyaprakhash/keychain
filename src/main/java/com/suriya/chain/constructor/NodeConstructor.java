@@ -1,5 +1,6 @@
 package com.suriya.chain.constructor;
 
+import com.suriya.chain.algorithm.Cryptography;
 import com.suriya.chain.algorithm.Hash;
 import com.suriya.chain.algorithm.SymmetricKey;
 import com.suriya.chain.parser.AttributeParser;
@@ -11,22 +12,33 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.security.KeyStore;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static com.suriya.io.KeyChainSettings.General.*;
+import static com.suriya.io.KeyChainSettings.Algorithm.*;
 
 public class NodeConstructor {
 
     private List<ConstructorKeyNode> constructorKeyNodeList;
     private String starterNodeName;
     private String starterNodePassword;
+    private PrivateKey privateKey;
 
-    private NodeConstructor() {}
+    private NodeConstructor(PrivateKey privateKey) {}
 
     public static NodeConstructor initialize(List<KeyNode> keyNodeList) {
-        NodeConstructor nodeConstructor = new NodeConstructor();
+        NodeConstructor nodeConstructor = new NodeConstructor(null);
+        nodeConstructor.constructorKeyNodeList =  keyNodeList.stream().map(keyNode ->  new ConstructorKeyNode(keyNode))
+                .collect(Collectors.toList());
+        return nodeConstructor;
+    }
+
+    public static NodeConstructor initialize(List<KeyNode> keyNodeList, PrivateKey privateKey) {
+        NodeConstructor nodeConstructor = new NodeConstructor(privateKey);
         nodeConstructor.constructorKeyNodeList =  keyNodeList.stream().map(keyNode ->  new ConstructorKeyNode(keyNode))
                 .collect(Collectors.toList());
         return nodeConstructor;
@@ -55,8 +67,20 @@ public class NodeConstructor {
             constructorKeyNode.setSecureRandomKey(key);
 
             // setting attributeSet
-            Set<KeyStore.Entry.Attribute> attributeSet = gatherAttributeSet(constructorKeyNode.getAttributeMap());
+            Set<KeyStore.Entry.Attribute> attributeSet = null;
+            if (privateKey != null) { // encrypt if privateKey passed
+                Map<String, String> encryptedAttributeMap = new HashMap<>();
+                constructorKeyNode.getAttributeMap().forEach((mapKey, mapValue) -> {
+                    encryptedAttributeMap.put(mapKey, new String(Cryptography.encrypt(cipherAlgorithm, this.privateKey,
+                            mapValue.getBytes(StandardCharsets.UTF_8))));
+
+                });
+                attributeSet = gatherAttributeSet(encryptedAttributeMap);
+            } else { // don't encrypt if privateKey not passed
+                attributeSet = gatherAttributeSet(constructorKeyNodeList.get(index).getAttributeMap());
+            }
             constructorKeyNode.setAttributeSet(attributeSet);
+
 
             KeyStore.Entry.Attribute nextKeyNodeNameAttribute = null;
             KeyStore.Entry.Attribute nextKeyNodePasswordAttribute = null;
@@ -67,16 +91,30 @@ public class NodeConstructor {
             if (index != constructorKeyNodeList.size() - 1) { // skip the last index
                 nextPasswordHash = generateNextPasswordHash(key.getEncoded(), attributeSet.toString()
                         .getBytes(StandardCharsets.UTF_8));
-                nextKeyNodeNameAttribute = AttributeParser.getAttributeFromKeyValue(nextKeyNodePasswordAttributeKey,
-                        nextPasswordHash);
+                if (privateKey != null) { // encrypt if privateKey passed
+                    String encryptedNextPasswordHash = new String(Cryptography.encrypt(cipherAlgorithm, this.privateKey,
+                            nextPasswordHash.getBytes(StandardCharsets.UTF_8)));
+                    nextKeyNodeNameAttribute = AttributeParser.getAttributeFromKeyValue(nextKeyNodePasswordAttributeKey,
+                            encryptedNextPasswordHash);
+                } else { // don't encrypt if privateKey not passed
+                    nextKeyNodeNameAttribute = AttributeParser.getAttributeFromKeyValue(nextKeyNodePasswordAttributeKey,
+                            nextPasswordHash);
+                }
                 attributeSet.add(nextKeyNodeNameAttribute);
             }
 
             // setting attribute - nextNode
             if (index != constructorKeyNodeList.size() - 1) { // skip the last index
                 String nextNodeName = constructorKeyNodeList.get(index + 1).getEntryName();
-                nextKeyNodePasswordAttribute = AttributeParser.getAttributeFromKeyValue(nextKeyNodeNameAttributeKey,
-                        nextNodeName);
+                if (privateKey != null) { // encrypt if privateKey passed
+                    String encryptedNextNodeName = new String(Cryptography.encrypt(cipherAlgorithm, this.privateKey,
+                            nextNodeName.getBytes(StandardCharsets.UTF_8)));
+                    nextKeyNodePasswordAttribute = AttributeParser.getAttributeFromKeyValue(nextKeyNodeNameAttributeKey,
+                            encryptedNextNodeName);
+                } else {
+                    nextKeyNodePasswordAttribute = AttributeParser.getAttributeFromKeyValue(nextKeyNodeNameAttributeKey,
+                            nextNodeName);
+                }
                 attributeSet.add(nextKeyNodePasswordAttribute);
             }
 
