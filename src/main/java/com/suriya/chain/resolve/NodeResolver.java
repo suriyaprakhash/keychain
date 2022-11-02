@@ -1,5 +1,6 @@
 package com.suriya.chain.resolve;
 
+import com.suriya.chain.algorithm.Cryptography;
 import com.suriya.chain.parser.AttributeParser;
 import com.suriya.chain.parser.ByteProcessor;
 
@@ -8,6 +9,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.suriya.io.KeyChainSettings.General.*;
 
@@ -26,6 +28,7 @@ public class NodeResolver {
         // read entry
         KeyStore.Entry entry = ByteProcessor.readKeyStoreEntryOfSecretKeyFromKeyStore(this.keyStore, entryName,
                 entryPassword);
+
         // get attributes
         Set<KeyStore.Entry.Attribute> attributeSet = entry.getAttributes();
 
@@ -34,12 +37,16 @@ public class NodeResolver {
         nextNodeAttributeSet.add(nextKeyNodeNameAttributeKey);
         nextNodeAttributeSet.add(nextKeyNodePasswordAttributeKey);
         Map<String, String> nextNodeMap = AttributeParser.populateAttributeMapFromSet(attributeSet,
-                nextNodeAttributeSet);
+                nextNodeAttributeSet).entrySet().stream().collect(Collectors.toMap(entryMap -> entryMap.getKey(),
+                entryMap -> Cryptography.AES.decrypt(entryMap.getValue(), entryMap.getKey())));
+
+        Map<String, String> attributeMap = AttributeParser.populateAttributeMapFromSet(attributeSet,
+                attributeMapKeySet).entrySet().stream().collect(Collectors.toMap(entryMap -> entryMap.getKey(),
+                entryMap -> Cryptography.AES.decrypt(entryMap.getValue(), entryMap.getKey())));
 
         // create resolver node
-        ResolverKeyNode resolverKeyNode = new ResolverKeyNode(AttributeParser.populateAttributeMapFromSet(attributeSet,
-                attributeMapKeySet), entryName, nextNodeMap.get(nextKeyNodeNameAttributeKey),
-                nextNodeMap.get(nextKeyNodePasswordAttributeKey));
+        ResolverKeyNode resolverKeyNode = new ResolverKeyNode(attributeMap, entryName, nextNodeMap
+                .get(nextKeyNodeNameAttributeKey), nextNodeMap.get(nextKeyNodePasswordAttributeKey));
 
         return resolverKeyNode;
     }

@@ -1,11 +1,14 @@
 package com.suriya.chain.constructor;
 
+import com.suriya.chain.algorithm.Cryptography;
+import com.suriya.chain.parser.AttributeParser;
 import com.suriya.data.KeyNode;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.security.KeyStore;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class NodeConstructorTest {
 
@@ -38,12 +41,26 @@ public class NodeConstructorTest {
 
         NodeConstructor nodeConstructor = NodeConstructor.initialize(keyNodeList);
         Set<ConstructorKeyNode> constructorKeyNodeSet = nodeConstructor.build();
+
         String firstNode = nodeConstructor.starterNodeName();
 
         // checking value
         Set<KeyStore.Entry.Attribute> attributeSet = constructorKeyNodeSet.stream().filter(keyNode -> keyNode
                 .getEntryName().equals(firstNode)).findAny().get().getAttributeSet();
-        Assertions.assertTrue(attributeSet.stream().anyMatch(attribute -> attribute.getValue().equals("one")));
-        Assertions.assertTrue(attributeSet.stream().anyMatch(attribute -> attribute.getValue().equals("two")));
+
+        Map<String, String> encryptedAttributeFirstNodeMap = AttributeParser.populateAttributeMapFromSet(attributeSet,
+                attributeMap1.keySet());
+
+        encryptedAttributeFirstNodeMap.forEach((key, value) -> {
+            System.out.println();
+            System.out.print(key + " : " + Cryptography.AES.decrypt(value, key));
+        });
+
+        Assertions.assertTrue(Cryptography.AES.decrypt(encryptedAttributeFirstNodeMap.get("1"), "1")
+                .equals("one"));
+        Assertions.assertTrue(Cryptography.AES.decrypt(encryptedAttributeFirstNodeMap.get("2"), "2")
+                .equals("two"));
+
+
     }
 }

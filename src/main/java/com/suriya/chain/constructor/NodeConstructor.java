@@ -1,5 +1,6 @@
 package com.suriya.chain.constructor;
 
+import com.suriya.chain.algorithm.Cryptography;
 import com.suriya.chain.algorithm.Hash;
 import com.suriya.chain.algorithm.SymmetricKey;
 import com.suriya.chain.parser.AttributeParser;
@@ -54,8 +55,13 @@ public class NodeConstructor {
                     .generateSecureRandomKey(KeyChainSettings.Algorithm.secureRandomKeyAlgorithm);
             constructorKeyNode.setSecureRandomKey(key);
 
+            Map<String, String > encryptedAttributeMap = constructorKeyNode.getAttributeMap().entrySet().stream()
+                    .collect(Collectors.toMap(entryMap -> entryMap.getKey(), entryMap ->
+                         Cryptography.AES.encrypt(entryMap.getValue(), entryMap.getKey())
+                    ));
+
             // setting attributeSet
-            Set<KeyStore.Entry.Attribute> attributeSet = gatherAttributeSet(constructorKeyNode.getAttributeMap());
+            Set<KeyStore.Entry.Attribute> attributeSet = gatherAttributeSet(encryptedAttributeMap);
             constructorKeyNode.setAttributeSet(attributeSet);
 
             KeyStore.Entry.Attribute nextKeyNodeNameAttribute = null;
@@ -67,17 +73,17 @@ public class NodeConstructor {
             if (index != constructorKeyNodeList.size() - 1) { // skip the last index
                 nextPasswordHash = generateNextPasswordHash(key.getEncoded(), attributeSet.toString()
                         .getBytes(StandardCharsets.UTF_8));
-                nextKeyNodeNameAttribute = AttributeParser.getAttributeFromKeyValue(nextKeyNodePasswordAttributeKey,
-                        nextPasswordHash);
-                attributeSet.add(nextKeyNodeNameAttribute);
+                nextKeyNodePasswordAttribute = AttributeParser.getAttributeFromKeyValue(nextKeyNodePasswordAttributeKey,
+                        Cryptography.AES.encrypt(nextPasswordHash, nextKeyNodePasswordAttributeKey));
+                attributeSet.add(nextKeyNodePasswordAttribute);
             }
 
             // setting attribute - nextNode
             if (index != constructorKeyNodeList.size() - 1) { // skip the last index
                 String nextNodeName = constructorKeyNodeList.get(index + 1).getEntryName();
-                nextKeyNodePasswordAttribute = AttributeParser.getAttributeFromKeyValue(nextKeyNodeNameAttributeKey,
-                        nextNodeName);
-                attributeSet.add(nextKeyNodePasswordAttribute);
+                nextKeyNodeNameAttribute = AttributeParser.getAttributeFromKeyValue(nextKeyNodeNameAttributeKey,
+                        Cryptography.AES.encrypt(nextNodeName, nextKeyNodeNameAttributeKey));
+                attributeSet.add(nextKeyNodeNameAttribute);
             }
 
             // setting generated hash password in the next node
