@@ -1,11 +1,11 @@
 package com.suriya.chain.resolve;
 
 import com.suriya.chain.algorithm.Cryptography;
+import com.suriya.chain.exception.KeyChainException;
 import com.suriya.chain.parser.AttributeParser;
 import com.suriya.chain.parser.ByteProcessor;
 
 import java.security.KeyStore;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -23,7 +23,8 @@ public class NodeResolver {
         return nodeResolver;
     }
 
-    public ResolverKeyNode resolve(String entryName, String entryPassword, Set<String> attributeMapKeySet) {
+    public ResolverKeyNode resolve(String entryName, String entryPassword, Set<String> attributeMapKeySet)
+            throws KeyChainException {
 
         // read entry
         KeyStore.Entry entry = ByteProcessor.readKeyStoreEntryOfSecretKeyFromKeyStore(this.keyStore, entryName,

@@ -5,11 +5,14 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class PasswordGenerator {
+/**
+ * This class generates random string based on the rules specified.
+ */
+public class RandomStringGenerator {
 
     private final List<Rule> rules;
 
-    private PasswordGenerator(Builder builder) {
+    private RandomStringGenerator(Builder builder) {
         this.rules = builder.rules;
     }
 
@@ -124,14 +127,14 @@ public class PasswordGenerator {
             return this;
         }
 
-        public PasswordGenerator build() {
+        public RandomStringGenerator build() {
             if (rules.size() == 0) {
                 this.digits(4);
                 this.lower(1);
                 this.upper(2);
                 this.punctuation(2);
             }
-            return new PasswordGenerator(this);
+            return new RandomStringGenerator(this);
         }
 
         public String generate(int length) {

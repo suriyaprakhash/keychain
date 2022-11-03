@@ -6,6 +6,9 @@ import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * This class provides basic conversion logic different type of string and bytes
+ */
 public class ConversionUtil {
 
     public static String bytesToHex(byte[] inputBytes) {

@@ -7,6 +7,8 @@ import java.security.*;
 import java.util.Arrays;
 import java.util.Base64;
 
+import static com.suriya.io.KeyChainSettings.Algorithm.*;
+
 public class Cryptography {
 
     public static byte[] encrypt(String cipherAlgorithm, PrivateKey privateKey, byte[] actualData) {
@@ -54,15 +56,15 @@ public class Cryptography {
 
 
     public static class AES {
-        private static SecretKeySpec secretKey;
-        private static byte[] key;
 
         private static String secretKeySpecAlgorithm = "AES";
-        private static String aesCipherAlgorithm = "AES/ECB/PKCS5Padding";
+//        private static String aesCipherAlgorithm = "AES/ECB/PKCS5Padding";
         private static String messageDigestAlgorithm = "SHA-1";
 
-        private static void setKey(final String myKey) {
+        private static SecretKeySpec setKey(final String myKey) {
             MessageDigest sha = null;
+            SecretKeySpec secretKey = null;
+            byte[] key = null;
             try {
                 key = myKey.getBytes(StandardCharsets.UTF_8);
                 sha = MessageDigest.getInstance(messageDigestAlgorithm);
@@ -72,13 +74,13 @@ public class Cryptography {
             } catch (NoSuchAlgorithmException e) {
                 e.printStackTrace();
             }
+            return secretKey;
         }
 
         public static String encrypt(final String strToEncrypt, final String secret) {
             try {
-                setKey(secret);
                 Cipher cipher = Cipher.getInstance(aesCipherAlgorithm);
-                cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+                cipher.init(Cipher.ENCRYPT_MODE, setKey(secret));
                 return Base64.getEncoder()
                         .encodeToString(cipher.doFinal(strToEncrypt.getBytes(StandardCharsets.UTF_8)));
             } catch (Exception e) {
@@ -89,9 +91,8 @@ public class Cryptography {
 
         public static String decrypt(final String strToDecrypt, final String secret) {
             try {
-                setKey(secret);
                 Cipher cipher = Cipher.getInstance(aesCipherAlgorithm);
-                cipher.init(Cipher.DECRYPT_MODE, secretKey);
+                cipher.init(Cipher.DECRYPT_MODE, setKey(secret));
                 return new String(cipher.doFinal(Base64.getDecoder()
                         .decode(strToDecrypt)));
             } catch (Exception e) {

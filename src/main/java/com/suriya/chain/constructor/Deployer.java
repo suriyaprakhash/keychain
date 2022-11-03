@@ -3,7 +3,7 @@ package com.suriya.chain.constructor;
 import com.suriya.chain.exception.KeyChainException;
 import com.suriya.chain.parser.ByteProcessor;
 import com.suriya.chain.parser.FileProcessor;
-import com.suriya.util.PasswordGenerator;
+import com.suriya.util.RandomStringGenerator;
 
 import java.security.KeyStore;
 import java.util.Set;
@@ -57,7 +57,7 @@ public class Deployer {
 
         // handle new file
         if (filePassword == null || keyStoreByteArray == null) {
-            filePassword = new PasswordGenerator.Builder()
+            filePassword = new RandomStringGenerator.Builder()
                     .lower(2)
                     .upper(2)
                     .digits(1)

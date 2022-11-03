@@ -6,7 +6,7 @@ import com.suriya.chain.algorithm.SymmetricKey;
 import com.suriya.chain.parser.AttributeParser;
 import com.suriya.data.KeyNode;
 import com.suriya.io.KeyChainSettings;
-import com.suriya.util.PasswordGenerator;
+import com.suriya.util.RandomStringGenerator;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -97,7 +97,7 @@ public class NodeConstructor {
         starterNodeName = constructorKeyNodeList.get(0).getEntryName();
 
         // set starter node password
-        this.starterNodePassword = new PasswordGenerator.Builder()
+        this.starterNodePassword = new RandomStringGenerator.Builder()
                 .lower(2)
                 .upper(2)
                 .digits(1)
@@ -119,7 +119,7 @@ public class NodeConstructor {
 
     private String autoGenerateAliasNameIfMissing(String entryAliasName) {
         if (entryAliasName == null || (entryAliasName != null && entryAliasName.length() == 0)) {
-            entryAliasName = new PasswordGenerator.Builder()
+            entryAliasName = new RandomStringGenerator.Builder()
                     .lower()
                     .build().generate(entryAliasNameLength);
         }
