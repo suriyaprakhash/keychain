@@ -43,6 +43,11 @@ public class Deployer {
         return this;
     }
 
+    public Deployer chain(KeyStore keyStore) throws KeyChainException {
+        addSecretsToKeyStore(keyStore);
+        return this;
+    }
+
     private KeyStore addSecretsToKeyStore() throws KeyChainException {
         byte[] keyStoreByteArray = null;
 
@@ -69,17 +74,20 @@ public class Deployer {
         // read keystore from existing or init keystore
         KeyStore keyStore = ByteProcessor.keyStoreFromKeyStoreByteArray(keyStoreByteArray, keyStoreAlgorithm,
                 filePassword);
+        addSecretsToKeyStore(keyStore);
+        return keyStore;
+    }
+
+    private void addSecretsToKeyStore(KeyStore keyStore) throws KeyChainException {
         constructorKeyNodeSet.stream().forEach(connectorKeyNode -> {
             try {
-                ByteProcessor.storeSecretKeyInKeyStore(keyStore, keyStoreAlgorithm,
-                        filePassword, connectorKeyNode.getSecureRandomKey(), connectorKeyNode.getEntryName(),
-                        connectorKeyNode.getPassword(), connectorKeyNode.getAttributeSet());
+                ByteProcessor.storeSecretKeyInKeyStore(keyStore, connectorKeyNode.getSecureRandomKey(),
+                        connectorKeyNode.getEntryName(), connectorKeyNode.getPassword(),
+                        connectorKeyNode.getAttributeSet());
             } catch (KeyChainException e) {
                 e.printStackTrace();
             }
         });
-
-        return keyStore;
     }
 
 

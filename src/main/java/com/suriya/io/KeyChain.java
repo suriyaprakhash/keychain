@@ -9,6 +9,7 @@ import com.suriya.chain.resolve.Reader;
 import com.suriya.chain.resolve.ResolverKeyNode;
 import com.suriya.data.KeyNode;
 
+import java.security.KeyStore;
 import java.util.List;
 import java.util.Set;
 
@@ -39,7 +40,8 @@ public class KeyChain {
         private String filePassword;
         private Set<ConstructorKeyNode> constructorKeyNodeSet;
 
-        private Constructor(String startsWith, String startsWithPassword, Set<ConstructorKeyNode> constructorKeyNodeSet) {
+        private Constructor(String startsWith, String startsWithPassword, Set<ConstructorKeyNode>
+                constructorKeyNodeSet) {
             this.startsWith = startsWith;
             this.startsWithPassword = startsWithPassword;
             this.constructorKeyNodeSet = constructorKeyNodeSet;
@@ -55,8 +57,8 @@ public class KeyChain {
         public static Constructor construct(List<KeyNode> keyNodeList) {
             NodeConstructor nodeConstructor = NodeConstructor.initialize(keyNodeList);
             Set<ConstructorKeyNode> constructorKeyNodeSet = nodeConstructor.build();
-            Constructor keyChain = new Constructor(nodeConstructor.starterNodeName(), nodeConstructor.startedNodePassword(),
-                    constructorKeyNodeSet);
+            Constructor keyChain = new Constructor(nodeConstructor.starterNodeName(), nodeConstructor
+                    .startedNodePassword(), constructorKeyNodeSet);
             return keyChain;
         }
 
@@ -107,6 +109,12 @@ public class KeyChain {
             return this;
         }
 
+        public Constructor chain(KeyStore keyStore) throws KeyChainException {
+            Deployer deployer = Deployer.initialize(constructorKeyNodeSet);
+            deployer.chain(keyStore);
+            return this;
+        }
+
     }
 
     public static class Resolver {
@@ -130,6 +138,12 @@ public class KeyChain {
         public static Resolver initialize(String filePath, String fileName, String filePassword)
                 throws KeyChainException {
             NodeResolver nodeResolver = NodeResolver.initialize(Reader.read(filePath, fileName, filePassword));
+            Resolver resolver = new Resolver(nodeResolver);
+            return resolver;
+        }
+
+        public static Resolver initialize(KeyStore keyStore) {
+            NodeResolver nodeResolver = NodeResolver.initialize(keyStore);
             Resolver resolver = new Resolver(nodeResolver);
             return resolver;
         }

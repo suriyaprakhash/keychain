@@ -51,7 +51,7 @@ public class ByteProcessor {
         return keyStore;
     }
 
-    public static void storeSecretKeyInKeyStore(KeyStore keyStore, String keyStoreAlgorithm, String keyStorePass, Key key,
+    public static void storeSecretKeyInKeyStore(KeyStore keyStore, Key key,
                                                 String secretKeyEntryAliasName, String secretPassword,
                                                 Set<KeyStore.Entry.Attribute> attributeSet) throws KeyChainException {
         try {
