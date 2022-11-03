@@ -1,7 +1,7 @@
 package com.suriya.chain.constructor;
 
 import com.suriya.chain.exception.KeyChainException;
-import com.suriya.data.KeyNode;
+import com.suriya.io.KeyNode;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 

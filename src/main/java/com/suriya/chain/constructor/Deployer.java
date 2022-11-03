@@ -11,7 +11,7 @@ import java.util.Set;
 import static com.suriya.io.KeyChainSettings.General.keyStorePasswordLength;
 import static com.suriya.io.KeyChainSettings.Algorithm.keyStoreAlgorithm;
 
-public class Deployer {
+public final class Deployer {
 
     private Set<ConstructorKeyNode> constructorKeyNodeSet;
     private String fileName;
@@ -43,7 +43,7 @@ public class Deployer {
         return this;
     }
 
-    public Deployer chain(KeyStore keyStore) throws KeyChainException {
+    public Deployer update(KeyStore keyStore) throws KeyChainException {
         addSecretsToKeyStore(keyStore);
         return this;
     }

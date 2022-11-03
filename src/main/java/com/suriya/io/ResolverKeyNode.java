@@ -1,10 +1,15 @@
-package com.suriya.chain.resolve;
+package com.suriya.io;
 
-import com.suriya.data.KeyNode;
+import com.suriya.io.KeyNode;
 
 import java.util.Map;
 
-public class ResolverKeyNode extends KeyNode {
+/**
+ * See {@link KeyNode} for the parent class information.
+ *
+ * This class provides additional properties to used during resolving the Key Chain
+ */
+public final class ResolverKeyNode extends KeyNode {
 
     private String nextNodeName;
     private String nextNodePassword;

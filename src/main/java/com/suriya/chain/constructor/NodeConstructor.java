@@ -4,7 +4,7 @@ import com.suriya.chain.algorithm.Cryptography;
 import com.suriya.chain.algorithm.Hash;
 import com.suriya.chain.algorithm.SymmetricKey;
 import com.suriya.chain.parser.AttributeParser;
-import com.suriya.data.KeyNode;
+import com.suriya.io.KeyNode;
 import com.suriya.io.KeyChainSettings;
 import com.suriya.util.RandomStringGenerator;
 
@@ -18,7 +18,7 @@ import java.util.stream.IntStream;
 
 import static com.suriya.io.KeyChainSettings.General.*;
 
-public class NodeConstructor {
+public final class NodeConstructor {
 
     private List<ConstructorKeyNode> constructorKeyNodeList;
     private String starterNodeName;

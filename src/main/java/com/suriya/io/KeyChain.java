@@ -6,8 +6,6 @@ import com.suriya.chain.constructor.NodeConstructor;
 import com.suriya.chain.exception.KeyChainException;
 import com.suriya.chain.resolve.NodeResolver;
 import com.suriya.chain.resolve.Reader;
-import com.suriya.chain.resolve.ResolverKeyNode;
-import com.suriya.data.KeyNode;
 
 import java.security.KeyStore;
 import java.util.List;
@@ -92,7 +90,8 @@ public class KeyChain {
         }
 
         /**
-         * This method deploys a new keyStore.
+         * This method deploys the key chain in the existing KeyStore file. Will throw KeyChainException in case if it
+         * couldn't locate the KeyStore file in the specified path or when an incorrect password is supplied.
          *
          * <p>For new keyStore file use {@link this#deploy(String, String)}</p>
          *
@@ -109,9 +108,9 @@ public class KeyChain {
             return this;
         }
 
-        public Constructor chain(KeyStore keyStore) throws KeyChainException {
+        public Constructor update(KeyStore keyStore) throws KeyChainException {
             Deployer deployer = Deployer.initialize(constructorKeyNodeSet);
-            deployer.chain(keyStore);
+            deployer.update(keyStore);
             return this;
         }
 

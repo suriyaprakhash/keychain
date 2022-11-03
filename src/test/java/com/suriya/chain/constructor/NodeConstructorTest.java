@@ -2,13 +2,12 @@ package com.suriya.chain.constructor;
 
 import com.suriya.chain.algorithm.Cryptography;
 import com.suriya.chain.parser.AttributeParser;
-import com.suriya.data.KeyNode;
+import com.suriya.io.KeyNode;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.security.KeyStore;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class NodeConstructorTest {
 

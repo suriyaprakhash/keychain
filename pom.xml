@@ -44,7 +44,7 @@
 <!--                    </includes>-->
                     <excludes>
                         <exclude>**/ReaderTest.java</exclude>
-                        <exclude>**/KeyChainTest.java</exclude>
+                        <exclude>**/KeyChainIntTest.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>

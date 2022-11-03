@@ -8,7 +8,7 @@ import java.security.KeyStore;
 
 import static com.suriya.io.KeyChainSettings.Algorithm.*;
 
-public class Reader {
+public final class Reader {
 
     public static KeyStore read(String filePath, String fileName, String filePassword) throws KeyChainException {
         byte[] keyStoreFileByteArray = FileProcessor.readFromFile(filePath, fileName);
